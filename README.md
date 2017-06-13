@@ -3,3 +3,4 @@
 - **buzzfeed.zip** -- [Buzzfeed data](https://github.com/rpitrust/fakenewsdata1)
 - **liar.zip** -- [Liar, liar pants on fire data](https://www.cs.ucsb.edu/~william/data/liar_dataset.zip)
 - **emergent** -- [Emergent data](https://github.com/willferreira/mscproject)
+- **fnc.zip** -- [Fake News Challenge data](https://github.com/FakeNewsChallenge/fnc-1)
