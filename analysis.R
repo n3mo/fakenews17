@@ -97,3 +97,83 @@ fn_documents
 tidy(dtm) %>%
     filter(document == 3) %>%
     arrange(desc(count))
+
+####################################################################
+## Snope Data Comparison
+####################################################################
+
+## Snopes data -----------------------------------------------------
+fake <- Corpus(DirSource("./fake_articles"))
+satire <- Corpus(DirSource("./satire_articles"))
+
+fake <- tm_map(fake, removeNumbers)
+fake <- tm_map(fake, removePunctuation)
+fake <- tm_map(fake , stripWhitespace)
+fake <- tm_map(fake, tolower)
+fake <- tm_map(fake, removeWords, stopwords("english")) 
+## fake <- tm_map(fake, stemDocument, language = "english")
+fake_dtm <-DocumentTermMatrix(fake) 
+## fake_dtm <- removeSparseTerms(fake_dtm, 0.75)
+
+satire <- tm_map(satire, removeNumbers)
+satire <- tm_map(satire, removePunctuation)
+satire <- tm_map(satire , stripWhitespace)
+satire <- tm_map(satire, tolower)
+satire <- tm_map(satire, removeWords, stopwords("english")) 
+## satire <- tm_map(satire, stemDocument, language = "english")
+satire_dtm <-DocumentTermMatrix(satire) 
+## satire_dtm <- removeSparseTerms(satire_dtm, 0.75)
+
+## Fit an LDA model to both fake news and satire (separately)
+fake_lda = LDA(fake_dtm, k = 4, control = list(seed = 1234))
+satire_lda = LDA(satire_dtm, k = 4, control = list(seed = 1234))
+
+## Extract per-topic-per-word probabilities (beta)
+fake_topics <- tidy(fake_lda, matrix = "beta")
+satire_topics <- tidy(satire_lda, matrix = "beta")
+
+## Plot the 10 most common words within each topic
+fake_top_terms <- fake_topics %>%
+    group_by(topic) %>%
+    top_n(10, beta) %>%
+    ungroup() %>%
+    arrange(topic, -beta)
+satire_top_terms <- satire_topics %>%
+    group_by(topic) %>%
+    top_n(10, beta) %>%
+    ungroup() %>%
+    arrange(topic, -beta)
+
+fake_top_terms %>%
+    mutate(term = reorder(term, beta)) %>%
+    ggplot(aes(term, beta, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ topic, scales = "free") +
+    coord_flip()
+satire_top_terms %>%
+    mutate(term = reorder(term, beta)) %>%
+    ggplot(aes(term, beta, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ topic, scales = "free") +
+    coord_flip()
+
+## Alternatively, we can visualize the words that had the greatest
+## difference in beta (probabilities) between topic 1 and topic 2
+## beta_spread <- fake_topics %>%
+##     mutate(topic = paste0("topic", topic)) %>%
+##     spread(topic, beta) %>%
+##     filter(topic1 > .001 | topic2 > .001) %>%
+##     mutate(log_ratio = log2(topic2 / topic1))
+
+## ## beta_spread # Inspect manually
+
+## topic1 = beta_spread %>% arrange(desc(log_ratio)) %>% head(10)
+## topic2 = beta_spread %>% arrange(log_ratio) %>% head(10)
+
+## ## Plot everything
+## par(mai=c(1,2,1,1))
+## barplot(c(topic1$log_ratio, topic2$log_ratio),
+##         names.arg = c(topic1$term, topic2$term),
+##         horiz = T, las = 1)
+## grid()
+## box()
