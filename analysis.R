@@ -111,8 +111,16 @@ fake <- tm_map(fake, removePunctuation)
 fake <- tm_map(fake , stripWhitespace)
 fake <- tm_map(fake, tolower)
 fake <- tm_map(fake, removeWords, stopwords("english")) 
-## fake <- tm_map(fake, stemDocument, language = "english")
-fake_dtm <-DocumentTermMatrix(fake) 
+## Document term matrix created. We weight by term frequence (the
+## default) as this is needed for topic modeling, which expects
+## integer counts of words/tokens
+fake_dtm <- DocumentTermMatrix(fake)
+## Although tf is needed for topic modeling, tf-idf is often preferred
+## for other analyses. We create a dtm weighted this way as well
+fake_dtm_tfidf <-DocumentTermMatrix(fake, 
+                                    control = 
+                                        list(weighting = 
+                                                 function(x) weightTfIdf(x, normalize = TRUE)))
 ## fake_dtm <- removeSparseTerms(fake_dtm, 0.75)
 
 satire <- tm_map(satire, removeNumbers)
@@ -120,8 +128,16 @@ satire <- tm_map(satire, removePunctuation)
 satire <- tm_map(satire , stripWhitespace)
 satire <- tm_map(satire, tolower)
 satire <- tm_map(satire, removeWords, stopwords("english")) 
-## satire <- tm_map(satire, stemDocument, language = "english")
-satire_dtm <-DocumentTermMatrix(satire) 
+## Document term matrix created. We weight by term frequence (the
+## default) as this is needed for topic modeling, which expects
+## integer counts of words/tokens
+satire_dtm <- DocumentTermMatrix(satire)
+## Although tf is needed for topic modeling, tf-idf is often preferred
+## for other analyses. We create a dtm weighted this way as well
+satire_dtm_tfidf <-DocumentTermMatrix(satire,
+                                      control = 
+                                          list(weighting = 
+                                                   function(x) weightTfIdf(x, normalize = TRUE))) 
 ## satire_dtm <- removeSparseTerms(satire_dtm, 0.75)
 
 ## Fit an LDA model to both fake news and satire (separately)
