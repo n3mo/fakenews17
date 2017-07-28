@@ -140,6 +140,39 @@ satire_dtm_tfidf <-DocumentTermMatrix(satire,
                                                    function(x) weightTfIdf(x, normalize = TRUE))) 
 ## satire_dtm <- removeSparseTerms(satire_dtm, 0.75)
 
+## Term frequency analysis for fake news
+freqf <- colSums(as.matrix(fake_dtm_tfidf))
+wff = data.frame(term=names(freqf),occurrences=freqf)
+wff$term = factor(wff$term, levels = wff$term[order(-wff$occurrences)])
+f <- ggplot(subset(wff, wff$occurrences > 0.8), aes(term, occurrences))
+f <- f + geom_bar(stat="identity")
+f <- f + theme(axis.text.x=element_text(angle=45, hjust=1))
+f
+
+## Term frequency analysis for satire
+freqs <- colSums(as.matrix(satire_dtm_tfidf))
+wfs = data.frame(term=names(freqs),occurrences=freqs)
+wfs$term = factor(wfs$term, levels = wfs$term[order(-wfs$occurrences)])
+s <- ggplot(subset(wfs, freqs > 0.8), aes(term, occurrences))
+s <- s + geom_bar(stat="identity")
+s <- s + theme(axis.text.x=element_text(angle=45, hjust=1))
+s
+
+## Alternatively, we can plot the top-n
+ordf = order(freqf, decreasing = T)
+f <- ggplot(head(wff[ordf,], 10), aes(term, occurrences))
+f <- f + geom_bar(stat="identity")
+f <- f + theme(axis.text.x=element_text(angle=45, hjust=1))
+f <- f + ylim(0, 2.5)
+f
+
+ords = order(freqs, decreasing = T)
+s <- ggplot(head(wfs[ords,], 10), aes(term, occurrences))
+s <- s + geom_bar(stat="identity")
+s <- s + theme(axis.text.x=element_text(angle=45, hjust=1))
+s <- s + ylim(0, 2.5)
+s
+
 ## Fit an LDA model to both fake news and satire (separately)
 fake_lda = LDA(fake_dtm, k = 4, control = list(seed = 1234))
 satire_lda = LDA(satire_dtm, k = 4, control = list(seed = 1234))
