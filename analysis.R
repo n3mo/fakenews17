@@ -198,34 +198,42 @@ df.r = data.frame(word = names(freqr[idx]),
 ord = order(df.r$word)
 df.r = df.r[ord, ]
 
-## GGPLOT VERSION TODO
-## ## Final combined dataset
-## d = rbind(df.f, df.r)
-
-## ggplot(d, aes(source, tfidf, group = word)) +
-##     geom_point(aes(color = factor(word)))
-
-## ggplot(d, aes(tfidf, source) +
-##     geom_abline(color = "gray40", lty = 2) +
-##     geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
-##     geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5) +
-##     scale_x_log10(labels = percent_format()) +
-##     scale_y_log10(labels = percent_format()) +
-##     scale_color_gradient(limits = c(0, 0.001), low = "darkslategray4", high = "gray75") +
-##     facet_wrap(~source, ncol = 2) +
-##     theme(legend.position="none") +
-##     labs(y = "Real News", x = "Fake News")
-
 ## Final combined dataset
 d = data.frame(word = df.f$word, fake = df.f$tfidf, real = df.r$tfidf,
                stringsAsFactors = FALSE)
 
+ggplot(d, aes(fake, real, color = abs(fake - real))) +
+    geom_abline(color = "gray40", lty = 2) +    
+    geom_point() +
+    geom_jitter(alpha = 0.1, size = 2.5, width = 0.3, height = 0.3) +
+    geom_text(aes(label = word), check_overlap = TRUE, vjust = 1.5, size = 5) +
+    scale_x_continuous() +
+    scale_y_continuous() + 
+    scale_color_gradient(limits = c(0, 3), low = "darkslategray4", high = "gray75") +
+    theme(legend.position="none") + 
+    labs(y = "Real News (tf-idf)", x = "Fake News (tf-idf)")
+
+
+
 ## For labeling the most influential terms
-idx = d$fake > 15 | d$real > 19.03138
-plot(d$fake, d$real,
-     xlab = "Fake News Terms",
-     ylab = "Real News Terms")
-text(d$fake[idx], d$real[idx], labels = d$word[idx], pos = 1)
+## tmp = abs(d$fake - d$real)
+## idx = d$fake > 15 | d$real > 19.03138
+## idx = tmp > 3
+## idx = d$fake > 3 | d$real > 3
+## plot(d$fake[!idx], d$real[!idx],
+##      xlab = "Fake News Terms",
+##      ylab = "Real News Terms",
+##      col = "gray75",
+##      ylim = c(0, 30),
+##      xlim = c(0, 25))
+## par(new = TRUE)
+## plot(d$fake[idx], d$real[idx],
+##      xlab = "Fake News Terms",
+##      ylab = "Real News Terms",
+##      col = "darkslategray4",
+##      ylim = c(0, 30),
+##      xlim = c(0, 25))
+## text(d$fake[idx], d$real[idx], labels = d$word[idx], pos = 1)
 
 ####################################################################
 ## Topic Modeling of SNOPES data
