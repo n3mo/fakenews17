@@ -236,6 +236,20 @@ ggplot(d, aes(fake, real, color = abs(fake - real))) +
 ## text(d$fake[idx], d$real[idx], labels = d$word[idx], pos = 1)
 
 ####################################################################
+## Sentiment Analysis
+####################################################################
+
+freqf <- colSums(as.matrix(fake_dtm))
+freqr <- colSums(as.matrix(real_dtm))
+df = data.frame(word = names(freqf), freq = as.numeric(freqf))
+dr = data.frame(word = names(freqr), freq = as.numeric(freqr))
+
+## These two data frames were written to disk as word frequency csv
+## files. For now, I've completed the sentiment analysis in Racket
+## using the data-science package
+
+
+####################################################################
 ## Topic Modeling of SNOPES data
 ####################################################################
 
